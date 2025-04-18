@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Turnos{% endblock %}
+
+{% block content %}
+<h2>Mis Turnos</h2>
+<ul class="list-group">
+    {% for turno in turnos %}
+        <li class="list-group-item">
+            {{ turno.cancha }} - {{ turno.fecha }} de {{ turno.hora_inicio }} a {{ turno.hora_fin }}
+        </li>
+    {% empty %}
+        <li class="list-group-item">No tienes turnos reservados.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

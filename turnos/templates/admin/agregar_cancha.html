@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Canchas{% endblock %}
+
+{% block content %}
+<h2>Agregar Cancha</h2>
+<form method="post", action="{% url 'agregar_cancha' %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+    </div>
+    <div class="form-group">
+        <label for="direccion">Direcci n:</label>
+        <input type="text" class="form-control" id="direccion" name="direccion" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Agregar</button>
+</form>
+{% endblock content %}
