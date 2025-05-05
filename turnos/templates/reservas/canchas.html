@@ -1,17 +1,40 @@
-{% extends "base.html" %}
-
-{% block title %}Canchas{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<h2>Canchas</h2>
-<ul class="list-group">
-    {% for cancha in canchas %}
-        <li class="list-group-item">
-            {{ cancha.nombre }} - {{ cancha.direccion }}
-            <a class="btn btn-primary" href="{% url 'detalle_cancha' cancha.id %}">Ver Detalle</a>
-        </li>
-    {% empty %}
-        <li class="list-group-item">No hay canchas disponibles.</li>
-    {% endfor %}
-</ul>
-{% endblock %}  
+<div class="container mt-5">
+    <h2 class="text-center mb-4">⚽ Canchas Disponibles</h2>
+
+    {% if canchas %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for cancha in canchas %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if cancha.imagen %}
+                            <img src="{{ cancha.imagen.url }}" class="card-img-top" alt="Imagen de la cancha">
+                        {% else %}
+                            <img src="https://via.placeholder.com/400x200?text=Cancha+Fútbol" class="card-img-top" alt="Sin imagen">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ cancha.nombre }}</h5>
+                            <p class="card-text">
+                                <strong>Ubicación:</strong> {{ cancha.direccion }}<br>
+                                <strong>Tipo:</strong> Fútbol {{ cancha.tipo }}<br>
+                                <strong>Precio/hora:</strong> ${{ cancha.precio }}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-center">
+                            <a href="{% url 'detalle_cancha' cancha.id %}" class="btn btn-outline-primary w-75">
+                                Ver Detalle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center mt-5">
+            No hay canchas disponibles por el momento.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

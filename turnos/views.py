@@ -95,7 +95,8 @@ def reservar_turno(request):
         turno = Turno.objects.create(cancha_id=cancha_id, fecha=fecha, horario_id=horario_id, usuario=user)
         turno.save()
         messages.success(request, "Turno reservado correctamente.")
-        return redirect('canchas')
+        return redirect('detalle_cancha', cancha_id=cancha_id)
+
     
 @login_required
 def cancelar_turno(request):

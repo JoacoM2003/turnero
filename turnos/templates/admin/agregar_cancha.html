@@ -1,19 +1,49 @@
-{% extends "base.html" %}
-
-{% block title %}Canchas{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<h2>Agregar Cancha</h2>
-<form method="post", action="{% url 'agregar_cancha' %}">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="nombre">Nombre:</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" required>
+<div class="container mt-4">
+    <h2 class="mb-4 text-center"><i class="bi bi-plus-circle-fill text-primary"></i> Agregar Nueva Cancha</h2>
+    
+    <div class="card shadow-sm rounded">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre de la Cancha</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej: Cancha 1" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ubicacion" class="form-label">Ubicación</label>
+                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" placeholder="Ej: Av. Siempre Viva 123" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tipo" class="form-label">Tipo de Cancha</label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option selected disabled>Seleccionar tipo...</option>
+                        <option value="5">Fútbol 5</option>
+                        <option value="7">Fútbol 7</option>
+                        <option value="11">Fútbol 11</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="precio" class="form-label">Precio por Hora ($)</label>
+                    <input type="number" class="form-control" id="precio" name="precio" min="0" placeholder="Ej: 2500" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="imagen" class="form-label">URL de Imagen</label>
+                    <input type="url" class="form-control" id="imagen" name="imagen" placeholder="https://...">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-check-circle-fill"></i> Guardar Cancha
+                </button>
+            </form>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="direccion">Direcci n:</label>
-        <input type="text" class="form-control" id="direccion" name="direccion" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Agregar</button>
-</form>
-{% endblock content %}
+</div>
+{% endblock %}

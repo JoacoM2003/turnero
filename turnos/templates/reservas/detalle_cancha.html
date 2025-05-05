@@ -3,86 +3,104 @@
 {% block title %}Turnos disponibles{% endblock %}
 
 {% block content %}
-<h2>Turnos para {{ cancha.nombre }}</h2>
+<div class="container py-4">
+  <h2 class="mb-4 text-center">Turnos para <span class="text-primary">{{ cancha.nombre }}</span></h2>
 
-<form method="get" class="mb-3">
-  <label for="fecha">Elegir fecha:</label>
-  <input type="date" name="fecha" id="fecha" value="{{ fecha }}" required>
-  <button class="btn btn-primary btn-sm" type="submit">Ver Turnos</button>
-</form>
+  <form method="get" class="d-flex align-items-end justify-content-center gap-3 mb-5">
+    <div>
+      <label for="fecha" class="form-label">Elegí una fecha:</label>
+      <input type="date" name="fecha" id="fecha" class="form-control" value="{{ fecha }}" required>
+    </div>
+    <button class="btn btn-outline-primary mt-3" type="submit">Ver Turnos</button>
+  </form>
 
-{% if fecha %}
-  <h4>Fecha seleccionada: {{ fecha }}</h4>
+  {% if fecha %}
+    <h4 class="mb-4 text-center">Turnos disponibles para: <strong>{{ fecha }}</strong></h4>
 
-  <ul class="list-group">
-    {% for horario in horarios %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        {{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}
-        {{ horario.id}}
+    <div class="row g-4">
+      {% for horario in horarios %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h5 class="card-title text-center mb-3">
+                🕒 {{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}
+              </h5>
 
-        {% if horario.id in horarios_reservados_usuario %}
-          <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal{{ horario.id }}">Cancelar</a>
-
-          <!-- Cancel Modal -->
-          <div class="modal fade" id="cancelModal{{ horario.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ horario.id }}" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="cancelModalLabel{{ horario.id }}">Confirmar Cancelación</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              {% if horario.id in horarios_reservados_usuario %}
+                <div class="text-center">
+                  <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal{{ horario.id }}">
+                    Cancelar
+                  </button>
                 </div>
-                <div class="modal-body">
-                  ¿Está seguro que desea cancelar esta reserva?
+
+                <!-- Cancelar Modal -->
+                <div class="modal fade" id="cancelModal{{ horario.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content rounded-3">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Confirmar Cancelación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        ¿Deseás cancelar este turno?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                        <form method="post" action="{% url 'cancelar_turno' %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
+                          <input type="hidden" name="fecha" value="{{ fecha }}">
+                          <input type="hidden" name="horario_id" value="{{ horario.id }}">
+                          <button type="submit" class="btn btn-danger">Sí, cancelar</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                  <form method="post" action="{% url 'cancelar_turno' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
-                    <input type="hidden" name="fecha" value="{{ fecha }}">
-                    <input type="hidden" name="horario_id" value="{{ horario.id }}">
-                    <button type="submit" class="btn btn-danger">Sí, Cancelar</button>
-                  </form>
+
+              {% elif horario.id in horarios_reservados %}
+                <div class="text-center">
+                  <span class="badge bg-danger">Reservado</span>
                 </div>
-              </div>
+
+              {% else %}
+                <div class="text-center">
+                  <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#reserveModal{{ horario.id }}">
+                    Reservar
+                  </button>
+                </div>
+
+                <!-- Reservar Modal -->
+                <div class="modal fade" id="reserveModal{{ horario.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content rounded-3">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Confirmar Reserva</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        ¿Deseás reservar este turno?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                        <form method="post" action="{% url 'reservar_turno' %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
+                          <input type="hidden" name="fecha" value="{{ fecha }}">
+                          <input type="hidden" name="horario_id" value="{{ horario.id }}">
+                          <button type="submit" class="btn btn-success">Sí, reservar</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              {% endif %}
             </div>
           </div>
-
-        {% elif horario.id in horarios_reservados %}
-          <span class="badge bg-danger">Reservado</span>
-        {% else %}
-          <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#reserveModal{{ horario.id }}">Reservar</a>
-
-          <!-- Reserve Modal -->
-          <div class="modal fade" id="reserveModal{{ horario.id }}" tabindex="-1" aria-labelledby="reserveModalLabel{{ horario.id }}" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="reserveModalLabel{{ horario.id }}">Confirmar Reserva</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  ¿Está seguro que desea reservar este turno?
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                  <form method="post" action="{% url 'reservar_turno' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
-                    <input type="hidden" name="fecha" value="{{ fecha }}">
-                    <input type="hidden" name="horario_id" value="{{ horario.id }}">
-                    <button type="submit" class="btn btn-success">Sí, Reservar</button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
-
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
 {% endblock %}
-
