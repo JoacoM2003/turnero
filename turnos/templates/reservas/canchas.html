@@ -1,40 +1,64 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">⚽ Canchas Disponibles</h2>
+{% block title_page %}Canchas{% endblock %}
 
-    {% if canchas %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for cancha in canchas %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        {% if cancha.imagen %}
-                            <img src="{{ cancha.imagen.url }}" class="card-img-top" alt="Imagen de la cancha">
-                        {% else %}
-                            <img src="https://via.placeholder.com/400x200?text=Cancha+Fútbol" class="card-img-top" alt="Sin imagen">
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ cancha.nombre }}</h5>
-                            <p class="card-text">
-                                <strong>Ubicación:</strong> {{ cancha.direccion }}<br>
-                                <strong>Tipo:</strong> Fútbol {{ cancha.tipo }}<br>
-                                <strong>Precio/hora:</strong> ${{ cancha.precio }}
-                            </p>
-                        </div>
-                        <div class="card-footer bg-transparent border-0 text-center">
-                            <a href="{% url 'detalle_cancha' cancha.id %}" class="btn btn-outline-primary w-75">
-                                Ver Detalle
-                            </a>
+{% block content %}
+<h2 class="mb-4">Canchas Disponibles</h2>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for cancha in canchas %}
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <img src="{{ cancha.imagen }}" class="card-img-top" alt="{{ cancha.nombre }}" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+                <h5 class="card-title">{{ cancha.nombre }}</h5>
+                <p class="card-text">{{ cancha.direccion }}</p>
+                <a href="{% url 'detalle_cancha' cancha.id %}" class="btn btn-primary">Ver Turnos</a>
+
+                {% if user.is_superuser %}
+                <!-- Botón que activa el modal -->
+                <button type="button" class="btn btn-danger btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#eliminarModal{{ cancha.id }}">
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="eliminarModal{{ cancha.id }}" tabindex="-1" aria-labelledby="eliminarModalLabel{{ cancha.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="eliminarModalLabel{{ cancha.id }}">Confirmar Eliminación</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Estás seguro que querés eliminar la cancha <strong>{{ cancha.nombre }}</strong>? Esta acción no se puede deshacer.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <form method="post" action="{% url 'eliminar_cancha' cancha.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            {% endfor %}
+                {% endif %}
+            </div>
         </div>
-    {% else %}
-        <div class="alert alert-info text-center mt-5">
-            No hay canchas disponibles por el momento.
+    </div>
+    {% endfor %}
+
+    {% if user.is_superuser %}
+    <!-- Tarjeta para agregar nueva cancha -->
+    <div class="col">
+        <div class="card h-100 text-center d-flex align-items-center justify-content-center border-dashed border-2" style="border-color: #6c757d;">
+            <div class="card-body">
+                <a href="{% url 'agregar_cancha' %}" class="btn btn-outline-success btn-lg">
+                    <i class="bi bi-plus-circle"></i> Agregar Cancha
+                </a>
+            </div>
         </div>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

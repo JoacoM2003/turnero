@@ -48,15 +48,31 @@ def canchas(request):
 
 @login_required
 def agregar_cancha(request):
+    if not request.user.is_superuser:
+        messages.error(request, "No tienes permiso para agregar canchas.")
+        return redirect('home')
     if request.method == 'POST':
+        print(request.POST)
         nombre = request.POST['nombre']
         direccion = request.POST['direccion']
-        cancha = Cancha.objects.create(nombre=nombre, direccion=direccion)
+        tipo = request.POST['tipo']
+        precio = request.POST['precio']
+        imagen = request.FILES.get('imagen')
+        cancha = Cancha.objects.create(nombre=nombre, direccion=direccion, tipo=tipo, precio=precio, imagen=imagen)
         cancha.save()
         messages.success(request, "Cancha agregada correctamente.")
         return redirect('canchas')
     return render(request, 'admin/agregar_cancha.html')
 
+@login_required
+def eliminar_cancha(request, cancha_id):
+    if not request.user.is_superuser:
+        messages.error(request, "No tienes permiso para eliminar canchas.")
+        return redirect('home')
+    cancha = get_object_or_404(Cancha, id=cancha_id)
+    cancha.delete()
+    messages.success(request, "Cancha eliminada correctamente.")
+    return redirect('canchas')
 
 @login_required
 def detalle_cancha(request, cancha_id):
@@ -109,3 +125,4 @@ def cancelar_turno(request):
         turno.delete()
         messages.success(request, "Turno cancelado correctamente.")
         return redirect('canchas')
+    

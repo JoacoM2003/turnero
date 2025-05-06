@@ -6,7 +6,7 @@
     
     <div class="card shadow-sm rounded">
         <div class="card-body">
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 
                 <div class="mb-3">
@@ -15,8 +15,8 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="ubicacion" class="form-label">Ubicación</label>
-                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" placeholder="Ej: Av. Siempre Viva 123" required>
+                    <label for="direccion" class="form-label">Ubicación</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ej: Av. Siempre Viva 123" required>
                 </div>
 
                 <div class="mb-3">
@@ -33,10 +33,9 @@
                     <label for="precio" class="form-label">Precio por Hora ($)</label>
                     <input type="number" class="form-control" id="precio" name="precio" min="0" placeholder="Ej: 2500" required>
                 </div>
-
                 <div class="mb-3">
-                    <label for="imagen" class="form-label">URL de Imagen</label>
-                    <input type="url" class="form-control" id="imagen" name="imagen" placeholder="https://...">
+                    <label for="imagen" class="form-label">Imagen de la Cancha</label>
+                    <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*">
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">

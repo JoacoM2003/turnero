@@ -11,4 +11,5 @@ urlpatterns = [
     path('detalle_cancha/<int:cancha_id>/', views.detalle_cancha, name='detalle_cancha'),
     path('reservar_turno/', views.reservar_turno, name='reservar_turno'),
     path('cancelar_turno/', views.cancelar_turno, name='cancelar_turno'),
+    path('eliminar_cancha/<int:cancha_id>/', views.eliminar_cancha, name='eliminar_cancha'),
 ]
