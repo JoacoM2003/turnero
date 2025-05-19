@@ -43,6 +43,8 @@ def signout(request):
 
 @login_required
 def canchas(request):
+    if not request.user.is_authenticated:
+        return redirect('signin')
     canchas = Cancha.objects.all()
     return render(request, 'reservas/canchas.html', {'canchas': canchas})
 

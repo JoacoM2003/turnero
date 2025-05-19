@@ -12,7 +12,9 @@
             <img src="{{ cancha.imagen }}" class="card-img-top" alt="{{ cancha.nombre }}" style="height: 200px; object-fit: cover;">
             <div class="card-body">
                 <h5 class="card-title">{{ cancha.nombre }}</h5>
-                <p class="card-text">{{ cancha.direccion }}</p>
+                <p class="card-text"><strong>Dirección:</strong> {{ cancha.direccion }}</p>
+                <p class="card-text"><strong>Precio:</strong> ${{ cancha.precio }}</p>
+
                 <a href="{% url 'detalle_cancha' cancha.id %}" class="btn btn-primary">Ver Turnos</a>
 
                 {% if user.is_superuser %}
