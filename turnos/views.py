@@ -43,7 +43,6 @@ def signout(request):
 
 @login_required
 def canchas(request):
-
     canchas = Cancha.objects.all()
     return render(request, 'reservas/canchas.html', {'canchas': canchas})
 
