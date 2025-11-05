@@ -1,66 +1,266 @@
 {% extends 'base.html' %}
 
-{% block title_page %}Canchas{% endblock %}
-
 {% block content %}
-<h2 class="mb-4">Canchas Disponibles</h2>
+<!-- Header con búsqueda -->
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="text-center text-white mb-4" data-aos="fade-down">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="bi bi-grid-3x3-gap-fill"></i> Canchas Disponibles
+            </h1>
+            <p class="lead">Encontrá la cancha perfecta para tu partido</p>
+        </div>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    {% for cancha in canchas %}
-    <div class="col">
-        <div class="card h-100 shadow-sm">
-            <img src="{{ cancha.imagen }}" class="card-img-top" alt="{{ cancha.nombre }}" style="height: 200px; object-fit: cover;">
-            <div class="card-body">
-                <h5 class="card-title">{{ cancha.nombre }}</h5>
-                <p class="card-text"><strong>Dirección:</strong> {{ cancha.direccion }}</p>
-                <p class="card-text"><strong>Precio:</strong> ${{ cancha.precio }}</p>
+        <!-- Búsqueda y filtros -->
+        <div class="row g-3 mt-4" data-aos="fade-up">
+            <div class="col-md-8">
+                <form method="get" class="d-flex gap-2">
+                    <input type="text" 
+                           name="search" 
+                           class="form-control form-control-lg" 
+                           placeholder="🔍 Buscar por nombre o ubicación..." 
+                           value="{{ search_query }}"
+                           style="border-radius: 15px; background: rgba(255,255,255,0.95); border: none;">
+                    <button type="submit" class="btn btn-modern btn-lg" style="background: white; color: #667eea; min-width: 120px;">
+                        Buscar
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <form method="get">
+                    <select name="tipo" class="form-select form-select-lg" onchange="this.form.submit()" style="border-radius: 15px; background: rgba(255,255,255,0.95); border: none;">
+                        <option value="">Todos los tipos</option>
+                        <option value="5" {% if tipo_filter == '5' %}selected{% endif %}>Fútbol 5</option>
+                        <option value="7" {% if tipo_filter == '7' %}selected{% endif %}>Fútbol 7</option>
+                        <option value="11" {% if tipo_filter == '11' %}selected{% endif %}>Fútbol 11</option>
+                    </select>
+                </form>
+            </div>
+        </div>
 
-                <a href="{% url 'detalle_cancha' cancha.id %}" class="btn btn-primary">Ver Turnos</a>
+        <!-- Limpiar filtros -->
+        {% if search_query or tipo_filter %}
+        <div class="text-center mt-3">
+            <a href="{% url 'canchas' %}" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px); border-radius: 10px;">
+                <i class="bi bi-x-circle"></i> Limpiar filtros
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
 
-                {% if user.is_superuser %}
-                <!-- Botón que activa el modal -->
-                <button type="button" class="btn btn-danger btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#eliminarModal{{ cancha.id }}">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
+<!-- Lista de canchas -->
+<section class="py-5 bg-light">
+    <div class="container">
+        {% if canchas %}
+        <div class="row g-4">
+            {% for cancha in canchas %}
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                <div class="card-modern overflow-hidden h-100">
+                    <!-- Imagen -->
+                    <div class="position-relative overflow-hidden" style="height: 240px;">
+                        {% if cancha.imagen %}
+                        <img src="{{ cancha.imagen.url }}" 
+                             alt="{{ cancha.nombre }}" 
+                             class="w-100 h-100 object-fit-cover"
+                             style="transition: transform 0.5s ease;">
+                        {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" 
+                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-trophy-fill text-white" style="font-size: 5rem; opacity: 0.3;"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Badge tipo de cancha -->
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge" style="background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%); font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 10px;">
+                                <i class="bi bi-trophy"></i> Fútbol {{ cancha.tipo|default:"N/A" }}
+                            </span>
+                        </div>
 
-                <!-- Modal -->
-                <div class="modal fade" id="eliminarModal{{ cancha.id }}" tabindex="-1" aria-labelledby="eliminarModalLabel{{ cancha.id }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title" id="eliminarModalLabel{{ cancha.id }}">Confirmar Eliminación</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        <!-- Precio -->
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-white text-dark fw-bold" style="font-size: 1rem; padding: 0.5rem 1rem; border-radius: 10px;">
+                                ${{ cancha.precio }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="p-4">
+                        <h4 class="fw-bold mb-3">{{ cancha.nombre }}</h4>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex align-items-start mb-2">
+                                <i class="bi bi-geo-alt-fill me-2 mt-1" style="color: #667eea;"></i>
+                                <span class="text-muted">{{ cancha.direccion }}</span>
                             </div>
-                            <div class="modal-body">
-                                ¿Estás seguro que querés eliminar la cancha <strong>{{ cancha.nombre }}</strong>? Esta acción no se puede deshacer.
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-cash-coin me-2" style="color: #0ba360;"></i>
+                                <span class="fw-bold" style="color: #0ba360;">${{ cancha.precio }} / hora</span>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <form method="post" action="{% url 'eliminar_cancha' cancha.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
-                                </form>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'detalle_cancha' cancha.id %}" 
+                               class="btn btn-modern btn-gradient flex-grow-1">
+                                <i class="bi bi-calendar-plus"></i> Reservar
+                            </a>
+                            
+                            {% if user.is_superuser %}
+                            <button type="button" 
+                                    class="btn btn-modern" 
+                                    style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#eliminarModal{{ cancha.id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+
+                            <!-- Modal Eliminar -->
+                            <div class="modal fade" id="eliminarModal{{ cancha.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="border-radius: 20px; border: none;">
+                                        <div class="modal-header border-0" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                            <h5 class="modal-title text-white fw-bold">
+                                                <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Eliminación
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body p-4">
+                                            <p class="mb-0">
+                                                ¿Estás seguro que querés eliminar la cancha <strong>{{ cancha.nombre }}</strong>? 
+                                                Esta acción no se puede deshacer.
+                                            </p>
+                                        </div>
+                                        <div class="modal-footer border-0">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <form method="post" action="{% url 'eliminar_cancha' cancha.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-modern" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                                                    Sí, eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                {% endif %}
             </div>
-        </div>
-    </div>
-    {% endfor %}
+            {% endfor %}
 
-    {% if user.is_superuser %}
-    <!-- Tarjeta para agregar nueva cancha -->
-    <div class="col">
-        <div class="card h-100 text-center d-flex align-items-center justify-content-center border-dashed border-2" style="border-color: #6c757d;">
-            <div class="card-body">
-                <a href="{% url 'agregar_cancha' %}" class="btn btn-outline-success btn-lg">
-                    <i class="bi bi-plus-circle"></i> Agregar Cancha
+            <!-- Card para agregar cancha (admin) -->
+            {% if user.is_superuser %}
+            <div class="col-md-6 col-lg-4" data-aos="fade-up">
+                <a href="{% url 'agregar_cancha' %}" class="text-decoration-none">
+                    <div class="card-modern h-100 d-flex align-items-center justify-content-center" 
+                         style="min-height: 400px; border: 3px dashed #667eea; background: rgba(102, 126, 234, 0.05);">
+                        <div class="text-center p-4">
+                            <div class="display-1 mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                <i class="bi bi-plus-circle-fill"></i>
+                            </div>
+                            <h4 class="fw-bold mb-2">Agregar Cancha</h4>
+                            <p class="text-muted mb-0">Expandí tu complejo deportivo</p>
+                        </div>
+                    </div>
                 </a>
             </div>
+            {% endif %}
         </div>
+
+        <!-- Paginación -->
+        {% if canchas.has_other_pages %}
+        <nav class="mt-5" data-aos="fade-up">
+            <ul class="pagination justify-content-center">
+                {% if canchas.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}" style="border-radius: 10px 0 0 10px;">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ canchas.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in canchas.paginator.page_range %}
+                    {% if canchas.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">{{ num }}</span>
+                    </li>
+                    {% elif num > canchas.number|add:'-3' and num < canchas.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if canchas.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ canchas.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ canchas.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}" style="border-radius: 0 10px 10px 0;">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <!-- Sin resultados -->
+        <div class="text-center py-5" data-aos="fade-up">
+            <div class="display-1 mb-4" style="opacity: 0.3;">
+                <i class="bi bi-search"></i>
+            </div>
+            <h3 class="fw-bold mb-3">No se encontraron canchas</h3>
+            <p class="text-muted mb-4">
+                {% if search_query %}
+                No hay resultados para "{{ search_query }}"
+                {% else %}
+                No hay canchas disponibles en este momento
+                {% endif %}
+            </p>
+            <a href="{% url 'canchas' %}" class="btn btn-modern btn-gradient">
+                <i class="bi bi-arrow-clockwise"></i> Ver todas las canchas
+            </a>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
+</section>
+
+<style>
+    .card-modern:hover img {
+        transform: scale(1.1);
+    }
+
+    .page-link {
+        border-radius: 10px;
+        margin: 0 5px;
+        border: 2px solid #e2e8f0;
+        color: #667eea;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+</style>
 {% endblock %}

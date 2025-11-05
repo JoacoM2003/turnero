@@ -1,106 +1,278 @@
-{% extends "base.html" %}
-
-{% block title %}Turnos disponibles{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-4">
-  <h2 class="mb-4 text-center">Turnos para <span class="text-primary">{{ cancha.nombre }}</span></h2>
-
-  <form method="get" class="d-flex align-items-end justify-content-center gap-3 mb-5">
-    <div>
-      <label for="fecha" class="form-label">Elegí una fecha:</label>
-      <input type="date" name="fecha" id="fecha" class="form-control" value="{{ fecha }}" required>
-    </div>
-    <button class="btn btn-outline-primary mt-3" type="submit">Ver Turnos</button>
-  </form>
-
-  {% if fecha %}
-    <h4 class="mb-4 text-center">Turnos disponibles para: <strong>{{ fecha }}</strong></h4>
-
-    <div class="row g-4">
-      {% for horario in horarios %}
-        <div class="col-md-6 col-lg-4">
-          <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body d-flex flex-column justify-content-between">
-              <h5 class="card-title text-center mb-3">
-                🕒 {{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}
-              </h5>
-
-              {% if horario.id in horarios_reservados_usuario %}
-                <div class="text-center">
-                  <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal{{ horario.id }}">
-                    Cancelar
-                  </button>
+<!-- Header de la cancha -->
+<section class="py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8" data-aos="fade-right">
+                <a href="{% url 'canchas' %}" class="btn btn-sm mb-3" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px); border-radius: 10px;">
+                    <i class="bi bi-arrow-left"></i> Volver a canchas
+                </a>
+                <h1 class="display-5 fw-bold text-white mb-3">
+                    <i class="bi bi-geo-alt-fill"></i> {{ cancha.nombre }}
+                </h1>
+                <div class="d-flex flex-wrap gap-3 mb-2">
+                    <span class="badge" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); font-size: 1rem; padding: 0.5rem 1rem; border-radius: 10px;">
+                        <i class="bi bi-map-fill"></i> {{ cancha.direccion }}
+                    </span>
+                    <span class="badge" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); font-size: 1rem; padding: 0.5rem 1rem; border-radius: 10px;">
+                        <i class="bi bi-trophy-fill"></i> Fútbol {{ cancha.tipo|default:"N/A" }}
+                    </span>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(10px); font-size: 1rem; padding: 0.5rem 1rem; border-radius: 10px;">
+                        <i class="bi bi-cash-coin"></i> ${{ cancha.precio }} / hora
+                    </span>
                 </div>
-
-                <!-- Cancelar Modal -->
-                <div class="modal fade" id="cancelModal{{ horario.id }}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content rounded-3">
-                      <div class="modal-header">
-                        <h5 class="modal-title">Confirmar Cancelación</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body">
-                        ¿Deseás cancelar este turno?
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                        <form method="post" action="{% url 'cancelar_turno' %}">
-                          {% csrf_token %}
-                          <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
-                          <input type="hidden" name="fecha" value="{{ fecha }}">
-                          <input type="hidden" name="horario_id" value="{{ horario.id }}">
-                          <button type="submit" class="btn btn-danger">Sí, cancelar</button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              {% elif horario.id in horarios_reservados %}
-                <div class="text-center">
-                  <span class="badge bg-danger">Reservado</span>
-                </div>
-
-              {% else %}
-                <div class="text-center">
-                  <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#reserveModal{{ horario.id }}">
-                    Reservar
-                  </button>
-                </div>
-
-                <!-- Reservar Modal -->
-                <div class="modal fade" id="reserveModal{{ horario.id }}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content rounded-3">
-                      <div class="modal-header">
-                        <h5 class="modal-title">Confirmar Reserva</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body">
-                        ¿Deseás reservar este turno?
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                        <form method="post" action="{% url 'reservar_turno' %}">
-                          {% csrf_token %}
-                          <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
-                          <input type="hidden" name="fecha" value="{{ fecha }}">
-                          <input type="hidden" name="horario_id" value="{{ horario.id }}">
-                          <button type="submit" class="btn btn-success">Sí, reservar</button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              {% endif %}
             </div>
-          </div>
+            <div class="col-md-4 text-end" data-aos="fade-left">
+                {% if cancha.imagen %}
+                <img src="{{ cancha.imagen.url }}" 
+                     alt="{{ cancha.nombre }}" 
+                     class="img-fluid rounded-4 shadow-lg"
+                     style="max-height: 200px; object-fit: cover; border: 4px solid rgba(255,255,255,0.3);">
+                {% endif %}
+            </div>
         </div>
-      {% endfor %}
     </div>
-  {% endif %}
-</div>
+</section>
+
+<!-- Selector de fecha -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="card-modern p-4" data-aos="fade-up">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <label class="form-label fw-bold mb-2">
+                        <i class="bi bi-calendar3"></i> Seleccioná una fecha:
+                    </label>
+                    <form method="get" id="dateForm">
+                        <div class="input-group">
+                            <input type="date" 
+                                   name="fecha" 
+                                   id="fecha" 
+                                   class="form-control form-control-lg" 
+                                   value="{{ fecha }}" 
+                                   min="{{ fecha_obj }}"
+                                   style="border-radius: 12px 0 0 12px; border-right: none;"
+                                   required>
+                            <button class="btn btn-modern btn-gradient" 
+                                    type="submit" 
+                                    style="border-radius: 0 12px 12px 0; padding: 0 2rem;">
+                                <i class="bi bi-search"></i> Ver Turnos
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                        <button class="btn btn-modern" style="background: rgba(102, 126, 234, 0.1); color: #667eea;" onclick="cambiarFecha(0)">
+                            <i class="bi bi-calendar-today"></i> Hoy
+                        </button>
+                        <button class="btn btn-modern" style="background: rgba(102, 126, 234, 0.1); color: #667eea;" onclick="cambiarFecha(1)">
+                            <i class="bi bi-calendar-plus"></i> Mañana
+                        </button>
+                        <button class="btn btn-modern" style="background: rgba(102, 126, 234, 0.1); color: #667eea;" onclick="cambiarFecha(7)">
+                            <i class="bi bi-calendar-week"></i> Próxima Semana
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Grid de horarios -->
+{% if fecha %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold mb-2">
+                <i class="bi bi-clock-history"></i> Turnos Disponibles
+            </h2>
+            <p class="text-muted">
+                Fecha seleccionada: <strong>{{ fecha_obj|date:"d/m/Y" }}</strong> ({{ fecha_obj|date:"l" }})
+            </p>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="row mb-4" data-aos="fade-up">
+            <div class="col-12">
+                <div class="card-modern p-3">
+                    <div class="d-flex flex-wrap gap-3 justify-content-center align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%); border-radius: 8px;"></div>
+                            <span class="fw-bold">Disponible</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 8px;"></div>
+                            <span class="fw-bold">Ocupado</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px;"></div>
+                            <span class="fw-bold">Tu Reserva</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de horarios -->
+        <div class="row g-3">
+            {% for horario in horarios %}
+            <div class="col-md-6 col-lg-4 col-xl-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                {% if horario.id in horarios_reservados_usuario %}
+                <!-- Tu reserva -->
+                <div class="card-modern p-4 text-center h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer;" 
+                     data-bs-toggle="modal" 
+                     data-bs-target="#cancelModal{{ horario.id }}">
+                    <div class="mb-3">
+                        <i class="bi bi-clock-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">{{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}</h4>
+                    <span class="badge bg-white text-dark mb-3" style="font-size: 0.9rem;">
+                        <i class="bi bi-check-circle-fill"></i> Tu Reserva
+                    </span>
+                    <button type="button" 
+                            class="btn btn-modern w-100" 
+                            style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+
+                {% elif horario.id in horarios_reservados %}
+                <!-- Ocupado -->
+                <div class="card-modern p-4 text-center h-100" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; opacity: 0.7; cursor: not-allowed;">
+                    <div class="mb-3">
+                        <i class="bi bi-lock-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">{{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}</h4>
+                    <span class="badge" style="background: rgba(255,255,255,0.3); font-size: 0.9rem;">
+                        <i class="bi bi-x-circle-fill"></i> No Disponible
+                    </span>
+                </div>
+
+                {% else %}
+                <!-- Disponible -->
+                <div class="card-modern p-4 text-center h-100" style="background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%); color: white; cursor: pointer;"
+                     data-bs-toggle="modal" 
+                     data-bs-target="#reserveModal{{ horario.id }}">
+                    <div class="mb-3">
+                        <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">{{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}</h4>
+                    <span class="badge bg-white text-success mb-3" style="font-size: 0.9rem;">
+                        <i class="bi bi-check-circle-fill"></i> Disponible
+                    </span>
+                    <button type="button" 
+                            class="btn btn-modern w-100" 
+                            style="background: rgba(255,255,255,0.9); color: #0ba360; font-weight: 700;">
+                        <i class="bi bi-calendar-plus"></i> Reservar
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- MODALES FUERA DEL GRID -->
+        {% for horario in horarios %}
+            {% if horario.id in horarios_reservados_usuario %}
+            <!-- Modal Cancelar -->
+            <div class="modal fade" id="cancelModal{{ horario.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ horario.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 20px; border: none;">
+                        <div class="modal-header border-0" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <h5 class="modal-title text-white fw-bold" id="cancelModalLabel{{ horario.id }}">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Cancelación
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="text-center mb-4">
+                                <i class="bi bi-clock-fill" style="font-size: 3rem; color: #667eea;"></i>
+                            </div>
+                            <p class="text-center mb-0">
+                                ¿Estás seguro que querés cancelar tu reserva para el 
+                                <strong>{{ fecha_obj|date:"d/m/Y" }}</strong> de 
+                                <strong>{{ horario.hora_inicio|time:"H:i" }}</strong> a 
+                                <strong>{{ horario.hora_fin|time:"H:i" }}</strong>?
+                            </p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener</button>
+                            <form method="post" action="{% url 'cancelar_turno' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
+                                <input type="hidden" name="fecha" value="{{ fecha }}">
+                                <input type="hidden" name="horario_id" value="{{ horario.id }}">
+                                <button type="submit" class="btn btn-modern" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                                    Sí, cancelar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% elif horario.id not in horarios_reservados %}
+            <!-- Modal Reservar -->
+            <div class="modal fade" id="reserveModal{{ horario.id }}" tabindex="-1" aria-labelledby="reserveModalLabel{{ horario.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 20px; border: none;">
+                        <div class="modal-header border-0" style="background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);">
+                            <h5 class="modal-title text-white fw-bold" id="reserveModalLabel{{ horario.id }}">
+                                <i class="bi bi-calendar-check-fill"></i> Confirmar Reserva
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="text-center mb-4">
+                                <i class="bi bi-geo-alt-fill" style="font-size: 3rem; color: #667eea;"></i>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="fw-bold text-center mb-4">{{ cancha.nombre }}</h5>
+                                <div class="d-flex justify-content-between mb-2 p-3" style="background: #f8fafc; border-radius: 10px;">
+                                    <span class="text-muted"><i class="bi bi-calendar3"></i> Fecha:</span>
+                                    <span class="fw-bold">{{ fecha_obj|date:"d/m/Y" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 p-3" style="background: #f8fafc; border-radius: 10px;">
+                                    <span class="text-muted"><i class="bi bi-clock"></i> Horario:</span>
+                                    <span class="fw-bold">{{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between p-3" style="background: #f8fafc; border-radius: 10px;">
+                                    <span class="text-muted"><i class="bi bi-cash"></i> Precio:</span>
+                                    <span class="fw-bold text-success">${{ cancha.precio }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form method="post" action="{% url 'reservar_turno' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="cancha_id" value="{{ cancha.id }}">
+                                <input type="hidden" name="fecha" value="{{ fecha }}">
+                                <input type="hidden" name="horario_id" value="{{ horario.id }}">
+                                <button type="submit" class="btn btn-modern btn-gradient-green">
+                                    <i class="bi bi-check-lg"></i> Confirmar Reserva
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<script>
+    function cambiarFecha(dias) {
+        const fechaInput = document.getElementById('fecha');
+        const hoy = new Date();
+        hoy.setDate(hoy.getDate() + dias);
+        const fechaStr = hoy.toISOString().split('T')[0];
+        fechaInput.value = fechaStr;
+        document.getElementById('dateForm').submit();
+    }
+</script>
 {% endblock %}

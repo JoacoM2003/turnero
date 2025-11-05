@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Header -->
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container text-center text-white" data-aos="fade-down">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-calendar-check-fill"></i> Mis Turnos
+        </h1>
+        <p class="lead">Gestioná todas tus reservas en un solo lugar</p>
+    </div>
+</section>
+
+<!-- Próximos turnos -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-up">
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-calendar-event"></i> Próximos Turnos
+            </h2>
+            <a href="{% url 'canchas' %}" class="btn btn-modern btn-gradient">
+                <i class="bi bi-plus-lg"></i> Nueva Reserva
+            </a>
+        </div>
+
+        {% if turnos_proximos %}
+        <div class="row g-4">
+            {% for turno in turnos_proximos %}
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                <div class="card-modern h-100 overflow-hidden">
+                    <!-- Imagen o placeholder -->
+                    <div class="position-relative" style="height: 180px;">
+                        {% if turno.cancha.imagen %}
+                        <img src="{{ turno.cancha.imagen.url }}" 
+                             alt="{{ turno.cancha.nombre }}" 
+                             class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" 
+                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-trophy-fill text-white" style="font-size: 4rem; opacity: 0.3;"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Badge de estado -->
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge" style="background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%); font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 10px;">
+                                <i class="bi bi-check-circle-fill"></i> Confirmado
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="p-4">
+                        <h4 class="fw-bold mb-3">{{ turno.cancha.nombre }}</h4>
+                        
+                        <!-- Información del turno -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-3" style="background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                                <span class="text-muted"><i class="bi bi-calendar3"></i> Fecha:</span>
+                                <span class="fw-bold">{{ turno.fecha|date:"d/m/Y" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-3" style="background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                                <span class="text-muted"><i class="bi bi-clock"></i> Horario:</span>
+                                <span class="fw-bold">{{ turno.horario }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center p-3" style="background: rgba(16, 185, 129, 0.1); border-radius: 10px;">
+                                <span class="text-muted"><i class="bi bi-geo-alt"></i> Ubicación:</span>
+                                <span class="fw-bold">{{ turno.cancha.direccion|truncatewords:3 }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'detalle_cancha' turno.cancha.id %}?fecha={{ turno.fecha }}" 
+                               class="btn btn-modern btn-gradient flex-grow-1">
+                                <i class="bi bi-eye"></i> Ver Detalles
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-modern" 
+                                    style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#cancelModal{{ turno.id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Cancelar -->
+                <div class="modal fade" id="cancelModal{{ turno.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" style="border-radius: 20px; border: none;">
+                            <div class="modal-header border-0" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                <h5 class="modal-title text-white fw-bold">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Cancelación
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="text-center mb-4">
+                                    <i class="bi bi-calendar-x" style="font-size: 4rem; color: #ef4444;"></i>
+                                </div>
+                                <h5 class="text-center mb-3">{{ turno.cancha.nombre }}</h5>
+                                <p class="text-center mb-0">
+                                    ¿Estás seguro que querés cancelar tu reserva para el 
+                                    <strong>{{ turno.fecha|date:"d/m/Y" }}</strong> de 
+                                    <strong>{{ turno.horario }}</strong>?
+                                </p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener</button>
+                                <form method="post" action="{% url 'cancelar_turno' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="cancha_id" value="{{ turno.cancha.id }}">
+                                    <input type="hidden" name="fecha" value="{{ turno.fecha }}">
+                                    <input type="hidden" name="horario_id" value="{{ turno.horario.id }}">
+                                    <button type="submit" class="btn btn-modern" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                                        <i class="bi bi-trash"></i> Sí, cancelar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Sin próximos turnos -->
+        <div class="card-modern p-5 text-center" data-aos="fade-up">
+            <div class="display-1 mb-4" style="opacity: 0.2;">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <h3 class="fw-bold mb-3">No tenés turnos próximos</h3>
+            <p class="text-muted mb-4">¡Es el momento perfecto para reservar una cancha!</p>
+            <a href="{% url 'canchas' %}" class="btn btn-modern btn-gradient btn-lg">
+                <i class="bi bi-calendar-plus"></i> Explorar Canchas
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Historial de turnos -->
+{% if turnos_pasados %}
+<section class="py-5">
+    <div class="container">
+        <h2 class="fw-bold mb-4" data-aos="fade-up">
+            <i class="bi bi-clock-history"></i> Historial de Reservas
+        </h2>
+
+        <div class="card-modern" data-aos="fade-up">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <tr>
+                            <th class="py-3 px-4">Cancha</th>
+                            <th class="py-3">Fecha</th>
+                            <th class="py-3">Horario</th>
+                            <th class="py-3">Ubicación</th>
+                            <th class="py-3 text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for turno in turnos_pasados %}
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        {% if turno.cancha.imagen %}
+                                        <img src="{{ turno.cancha.imagen.url }}" 
+                                             alt="{{ turno.cancha.nombre }}" 
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 10px;">
+                                        {% else %}
+                                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-trophy text-white"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ turno.cancha.nombre }}</div>
+                                        <small class="text-muted">Fútbol {{ turno.cancha.tipo }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="bi bi-calendar3 text-muted me-1"></i>
+                                {{ turno.fecha|date:"d/m/Y" }}
+                            </td>
+                            <td>
+                                <i class="bi bi-clock text-muted me-1"></i>
+                                {{ turno.horario }}
+                            </td>
+                            <td>
+                                <i class="bi bi-geo-alt text-muted me-1"></i>
+                                <small>{{ turno.cancha.direccion }}</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge" style="background: rgba(100, 116, 139, 0.2); color: #64748b; padding: 0.5rem 1rem; border-radius: 10px;">
+                                    <i class="bi bi-check-circle"></i> Completado
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-center mt-4" data-aos="fade-up">
+            <p class="text-muted">
+                <i class="bi bi-info-circle"></i> Mostrando las últimas 10 reservas completadas
+            </p>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Estadísticas personales -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4" data-aos="fade-up">
+                <div class="card-modern text-center p-4">
+                    <div class="display-4 mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <h2 class="fw-bold">{{ turnos_proximos|length }}</h2>
+                    <p class="text-muted mb-0">Reservas Activas</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-modern text-center p-4">
+                    <div class="display-4 mb-3" style="background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h2 class="fw-bold">{{ turnos_pasados|length }}</h2>
+                    <p class="text-muted mb-0">Turnos Completados</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-modern text-center p-4">
+                    <div class="display-4 mb-3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+                    <h2 class="fw-bold">{% widthratio turnos_proximos|length|add:turnos_pasados|length 1 1 %}</h2>
+                    <p class="text-muted mb-0">Total de Reservas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: scale(1.01);
+    }
+</style>
+{% endblock %}  

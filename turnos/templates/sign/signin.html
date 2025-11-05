@@ -1,33 +1,129 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 200px); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5" data-aos="fade-up">
+                <div class="card-modern p-5" style="backdrop-filter: blur(20px); background: rgba(255,255,255,0.95);">
+                    <!-- Logo/Icono -->
+                    <div class="text-center mb-4">
+                        <div class="d-inline-block p-4 rounded-circle mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-trophy-fill text-white" style="font-size: 3rem;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2">Bienvenido de vuelta</h2>
+                        <p class="text-muted">Ingresá a tu cuenta para continuar</p>
+                    </div>
 
-<main class="container py-5">
-    <div class="row">
-        <div class="col-md-4 offset-md-4">
-            <form action="{% url 'signin' %}", method="post" class="card card-body">
-                {% csrf_token %}
-                
-                <h1 class="text-center">Sign In</h1>
-        
-                {{error}}
+                    <!-- Formulario -->
+                    <form method="post" action="{% url 'signin' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-bold">
+                                <i class="bi bi-person-fill me-2"></i>Usuario
+                            </label>
+                            <input type="text" 
+                                   name="username" 
+                                   class="form-control form-control-lg" 
+                                   id="username" 
+                                   placeholder="Tu usuario"
+                                   style="border-radius: 12px; border: 2px solid #e2e8f0; padding: 1rem;"
+                                   required>
+                        </div>
 
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" name="username" class="form-control" id ="username" placeholder="Username">
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">
+                                <i class="bi bi-lock-fill me-2"></i>Contraseña
+                            </label>
+                            <div class="position-relative">
+                                <input type="password" 
+                                       name="password" 
+                                       class="form-control form-control-lg" 
+                                       id="password" 
+                                       placeholder="Tu contraseña"
+                                       style="border-radius: 12px; border: 2px solid #e2e8f0; padding: 1rem; padding-right: 3rem;"
+                                       required>
+                                <button type="button" 
+                                        class="btn position-absolute top-50 end-0 translate-middle-y me-2" 
+                                        onclick="togglePassword()"
+                                        style="border: none; background: transparent;">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-modern btn-gradient w-100 btn-lg mb-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        </button>
+
+                        <div class="text-center">
+                            <p class="text-muted mb-0">
+                                ¿No tenés cuenta? 
+                                <a href="{% url 'signup' %}" class="fw-bold" style="color: #667eea; text-decoration: none;">
+                                    Registrate aquí
+                                </a>
+                            </p>
+                        </div>
+                    </form>
                 </div>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" id="password" placeholder="Password">
+                <!-- Características rápidas -->
+                <div class="row g-3 mt-4 text-white">
+                    <div class="col-4 text-center" data-aos="fade-up" data-aos-delay="100">
+                        <i class="bi bi-lightning-charge-fill d-block mb-2" style="font-size: 2rem;"></i>
+                        <small>Reserva Rápida</small>
+                    </div>
+                    <div class="col-4 text-center" data-aos="fade-up" data-aos-delay="200">
+                        <i class="bi bi-shield-check d-block mb-2" style="font-size: 2rem;"></i>
+                        <small>100% Seguro</small>
+                    </div>
+                    <div class="col-4 text-center" data-aos="fade-up" data-aos-delay="300">
+                        <i class="bi bi-clock-fill d-block mb-2" style="font-size: 2rem;"></i>
+                        <small>24/7 Online</small>
+                    </div>
                 </div>
-
-                <button class="btn btn-primary">
-                    SignIn
-                </button>
-            </form>
+            </div>
         </div>
     </div>
-</main>
+</section>
 
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.className = 'bi bi-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.className = 'bi bi-eye';
+        }
+    }
+
+    // Efecto de enfoque en inputs
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.borderColor = '#667eea';
+            this.style.boxShadow = '0 0 0 0.2rem rgba(102, 126, 234, 0.25)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.borderColor = '#e2e8f0';
+            this.style.boxShadow = 'none';
+        });
+    });
+</script>
+
+<style>
+    input:focus {
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-3px);
+    }
+</style>
 {% endblock %}

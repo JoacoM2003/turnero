@@ -1,22 +1,229 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: calc(100vh - 200px);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6" data-aos="fade-up">
+                <div class="card-modern p-5" style="backdrop-filter: blur(20px); background: rgba(255,255,255,0.95);">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <div class="d-inline-block p-4 rounded-circle mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-person-plus-fill text-white" style="font-size: 3rem;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2">Crear Cuenta</h2>
+                        <p class="text-muted">Unite a nuestra comunidad deportiva</p>
+                    </div>
 
-<main class="container py-5">
-    <div class="row">
-        <div class="col-md-4 offset-md-4">
-            <form action="{% url 'signup' %}", method="post" class="card card-body">
-                {% csrf_token %}
-                
-                <h1 class="text-center">SignUp</h1>
-        
+                    <!-- Formulario -->
+                    <form method="post" action="{% url 'signup' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <!-- Nombre -->
+                            <div class="col-md-6">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-person me-2"></i>Nombre
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.first_name.errors %}
+                                            <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
 
-                {{ form.as_p }}
+                            <!-- Apellido -->
+                            <div class="col-md-6">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-person me-2"></i>Apellido
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.last_name.errors %}
+                                            <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
 
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
+                            <!-- Email -->
+                            <div class="col-12">
+                                <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-envelope me-2"></i>Email
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.email.errors %}
+                                            <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Usuario -->
+                            <div class="col-12">
+                                <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-at me-2"></i>Usuario
+                                </label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.username.errors %}
+                                            <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-info-circle"></i> Máximo 150 caracteres. Letras, dígitos y @/./+/-/_ solamente.
+                                </small>
+                            </div>
+
+                            <!-- Contraseña -->
+                            <div class="col-12">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-lock me-2"></i>Contraseña
+                                </label>
+                                <div class="position-relative">
+                                    {{ form.password1 }}
+                                    <button type="button" 
+                                            class="btn position-absolute top-50 end-0 translate-middle-y me-2" 
+                                            onclick="togglePassword('{{ form.password1.id_for_label }}', 'toggleIcon1')"
+                                            style="border: none; background: transparent;">
+                                        <i class="bi bi-eye" id="toggleIcon1"></i>
+                                    </button>
+                                </div>
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.password1.errors %}
+                                            <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-info-circle"></i> Mínimo 8 caracteres.
+                                </small>
+                            </div>
+
+                            <!-- Confirmar Contraseña -->
+                            <div class="col-12">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-lock-fill me-2"></i>Confirmar Contraseña
+                                </label>
+                                <div class="position-relative">
+                                    {{ form.password2 }}
+                                    <button type="button" 
+                                            class="btn position-absolute top-50 end-0 translate-middle-y me-2" 
+                                            onclick="togglePassword('{{ form.password2.id_for_label }}', 'toggleIcon2')"
+                                            style="border: none; background: transparent;">
+                                        <i class="bi bi-eye" id="toggleIcon2"></i>
+                                    </button>
+                                </div>
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.password2.errors %}
+                                            <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Botón submit -->
+                        <button type="submit" class="btn btn-modern btn-gradient w-100 btn-lg mt-4 mb-3">
+                            <i class="bi bi-check-circle"></i> Crear Cuenta
+                        </button>
+
+                        <!-- Link a login -->
+                        <div class="text-center">
+                            <p class="text-muted mb-0">
+                                ¿Ya tenés cuenta? 
+                                <a href="{% url 'signin' %}" class="fw-bold" style="color: #667eea; text-decoration: none;">
+                                    Iniciá sesión aquí
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Beneficios de registrarse -->
+                <div class="row g-3 mt-4">
+                    <div class="col-md-4 text-center text-white" data-aos="fade-up" data-aos-delay="100">
+                        <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <i class="bi bi-lightning-fill d-block mb-2" style="font-size: 2rem;"></i>
+                            <h6 class="fw-bold mb-1">Reserva Rápida</h6>
+                            <small>En menos de 30 segundos</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center text-white" data-aos="fade-up" data-aos-delay="200">
+                        <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <i class="bi bi-calendar-check d-block mb-2" style="font-size: 2rem;"></i>
+                            <h6 class="fw-bold mb-1">Gestiona Turnos</h6>
+                            <small>Desde un solo lugar</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center text-white" data-aos="fade-up" data-aos-delay="300">
+                        <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <i class="bi bi-shield-check d-block mb-2" style="font-size: 2rem;"></i>
+                            <h6 class="fw-bold mb-1">100% Seguro</h6>
+                            <small>Datos protegidos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</main>
+</section>
 
-{% endblock content %}
+<script>
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.className = 'bi bi-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.className = 'bi bi-eye';
+        }
+    }
+
+    // Estilos adicionales para los inputs del formulario
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+        
+        inputs.forEach(input => {
+            input.style.borderRadius = '12px';
+            input.style.border = '2px solid #e2e8f0';
+            input.style.padding = '1rem';
+            input.style.paddingRight = '3rem';
+            
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#667eea';
+                this.style.boxShadow = '0 0 0 0.2rem rgba(102, 126, 234, 0.25)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.borderColor = '#e2e8f0';
+                this.style.boxShadow = 'none';
+            });
+        });
+    });
+</script>
+
+<style>
+    input:focus {
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .form-control {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
